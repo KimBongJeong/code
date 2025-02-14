@@ -1,0 +1,78 @@
+{
+  "Id": "",
+  "GameId": "",
+  "EntryKey": "collisiongroupset://unique",
+  "ContentType": "x-mod/collisiongroupset",
+  "Content": "",
+  "Usage": 0,
+  "UsePublish": 1,
+  "UseService": 0,
+  "CoreVersion": "1.23.0.0",
+  "StudioVersion": "0.1.0.0",
+  "DynamicLoading": 0,
+  "ContentProto": {
+    "Use": "Json",
+    "Json": {
+      "Groups": [
+        {
+          "Id": "9aa40c43e0df455484ad59c38818dfde",
+          "Name": "Default"
+        },
+        {
+          "Id": "MOD@TriggerBox",
+          "Name": "TriggerBox"
+        },
+        {
+          "Id": "MOD@HitBox",
+          "Name": "HitBox"
+        },
+        {
+          "Id": "MOD@Interaction",
+          "Name": "Interaction"
+        },
+        {
+          "Id": "MOD@Portal",
+          "Name": "Portal"
+        },
+        {
+          "Id": "MOD@Climbable",
+          "Name": "Climbable"
+        },
+        {
+          "Id": "a1da67c154e942fb9fe2ca906429a0c0",
+          "Name": "Monster"
+        }
+      ],
+      "Matrix": {
+        "9aa40c43e0df455484ad59c38818dfde": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "a1da67c154e942fb9fe2ca906429a0c0"
+        ],
+        "MOD@TriggerBox": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "MOD@TriggerBox"
+        ],
+        "MOD@HitBox": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "MOD@HitBox"
+        ],
+        "MOD@Interaction": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "MOD@Interaction"
+        ],
+        "MOD@Portal": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "MOD@Portal"
+        ],
+        "MOD@Climbable": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "MOD@Climbable"
+        ],
+        "a1da67c154e942fb9fe2ca906429a0c0": [
+          "9aa40c43e0df455484ad59c38818dfde",
+          "a1da67c154e942fb9fe2ca906429a0c0"
+        ]
+      }
+    }
+  }
+}
