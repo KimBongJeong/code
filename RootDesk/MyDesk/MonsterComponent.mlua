@@ -15,7 +15,7 @@ script MonsterComponent extends Component
 
 	property number DestroyDelay = 0.6
 
-	property number thisExp = 20
+	property number thisExp = 5000
 
 	property number damage = 25
 
