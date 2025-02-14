@@ -1,0 +1,235 @@
+@Component
+script MyPlayerComponent extends Component
+
+	@TargetUserSync
+	property number meso = 0
+
+	@TargetUserSync
+	property number nowHp = 0
+
+	@TargetUserSync
+	property number maxHp = 100
+
+	@TargetUserSync
+	property number nowHunger = 50
+
+	@TargetUserSync
+	property number maxHunger = 100
+
+	@TargetUserSync
+	property number nowExp = 0
+
+	@TargetUserSync
+	property number maxExp = 100
+
+	@TargetUserSync
+	property number nowBattery = 50
+
+	@TargetUserSync
+	property number maxBattery = 100
+
+	@TargetUserSync
+	property number Lv = 1
+
+	@TargetUserSync
+	property string Class = "???"
+
+	@TargetUserSync
+	property number moveSpeed = 2
+
+	@TargetUserSync
+	property number skillTime = 10
+
+	property table expTable = { 100, 300, 600, 1000, 1500, 2100 }
+
+	@TargetUserSync
+	property boolean recovering = false
+
+	@TargetUserSync
+	property number flowRecoveringTime = 0
+
+	@TargetUserSync
+	property number recoveringTime = 2
+
+	property UITransformComponent uiHp = "f9cfd00e-3c14-4c1d-91a6-26183929ae99"
+
+	property UITransformComponent uiExp = "f69a4941-25fd-4b26-9b94-488426debfc5"
+
+	property UITransformComponent uiHunger = "a14539c8-e57a-445a-9f4b-020b4ecfadd9"
+
+	property UITransformComponent uiBattery = "4d971e77-645d-4f94-a441-0af1e8972d36"
+
+	property TextComponent textHp = "68eaa137-8094-414d-9865-8013bc5c880b"
+
+	property TextComponent textExp = "632efb06-58fa-4238-946c-2330d875e3af"
+
+	property TextComponent textHunger = "61772f76-b47b-484f-abea-935b4e426559"
+
+	property TextComponent textBattery = "90ecdf56-e8d9-49c8-a315-7ada61c73bdd"
+
+	property TextComponent textLv = "a30f9a0a-d7f6-44a9-8afd-0131383dddec"
+
+	property TextComponent textName = "84fdef91-fafd-47cc-be45-35a0de7eeaa4"
+
+	property TextComponent textClass = "a772983e-bd84-4125-b861-f9b0d4dbb856"
+
+	property Entity uiRevive = "a58f33f0-98be-47fa-bca9-ea19b1658103"
+
+	property Entity reviveBtn = "c4c5ed93-1430-441b-8513-6661e36de437"
+
+	property number power = 0
+
+	@Sync
+	property boolean User = false
+
+	@ExecSpace("ClientOnly")
+	method void OpenRevive()
+		self.uiRevive.Enable = true
+		self.reviveBtn:ConnectEvent("ButtonClickEvent" , function(event)
+			_UserService.LocalPlayer.PlayerState.nowHp = _UserService.LocalPlayer.PlayerState.maxHp
+			_UserService.LocalPlayer.StateComponent:ChangeState("IDLE")
+			self.uiRevive.Enable = false
+		end)
+	end
+
+	@ExecSpace("ServerOnly")
+	method void OnBeginPlay()
+		--PlayerComponent의 Hp, MaxHp와 싱크
+		self.Entity.PlayerComponent.MaxHp = self.maxHp;
+		self.Entity.PlayerComponent.Hp = self.nowHp;
+		
+		--self.nowHp = self.maxHp
+	end
+
+	@ExecSpace("ClientOnly")
+	method void OnUpdate(number delta)
+		
+		--self.Entity.PlayerComponent.UserId
+			--log(self.Entity.PlayerComponent.UserId)
+		    --log(_UserService.LocalPlayer)
+		if self.Entity ~= _UserService.LocalPlayer then
+			return
+		end
+		
+		if self.recovering == true then
+			self.flowRecoveringTime = self.flowRecoveringTime + delta
+			
+			if self.flowRecoveringTime >= self.recoveringTime then
+				self. flowRecoveringTime = 0
+				self.recovering = false
+				self.Entity.TriggerComponent.Enable = true
+			end
+		end
+		
+		if self.nowHp <= 0 then
+			self.nowHp = 0
+		end
+		
+		--플레이어창 변경
+		self.textHp.Text = tostring(math.floor(self.nowHp)).. "/" ..tostring(math.floor(self.maxHp))
+		self.textExp.Text = tostring(math.floor((self.nowExp / self.maxHp) * 100)) .. "%"
+		self.textHunger.Text = tostring(math.floor((self.nowHunger / self.maxHunger) * 100)) .. "%"
+		self.textBattery.Text = tostring(math.floor((self.nowBattery / self.maxBattery) * 100)) .. "%"
+		self.textLv.Text = tostring("LV".. (math.floor(self.Lv)))
+		self.textName.Text = tostring(self.Entity.PlayerComponent.Nickname)
+		self.textClass.Text = tostring(self.Class)
+		
+		self.uiHp.RectSize.x = 205 * (self.nowHp/self.maxHp)
+		self.uiExp.RectSize.x = 205 * (self.nowExp/self.maxExp)
+		self.uiHunger.RectSize.x = 120 * (self.nowHunger/self.maxHunger)
+		self.uiBattery.RectSize.x = 120 * (self.nowBattery/self.maxBattery)
+		
+		--레벨업 했을 경우
+		if self.nowExp >= self.maxExp then
+			self.Lv = self.Lv + 1
+			self.maxHp = self.maxHp + 52
+			self.maxExp = self.maxExp + 82
+			self.maxHunger = self.maxHunger + 8
+			self.maxBattery = self.maxBattery + 8
+			self.power = self.power + 4
+			self.nowExp = 0
+			self.nowExp = self.nowExp
+			self.uiExp.RectSize.x = 0 * (self.nowHunger/self.maxHunger) 
+			self.maxExp = self.expTable[self.Lv]
+			self.textExp.Text = tostring(math.floor((self.nowExp / self.maxHp) * 100)) .. "%"
+		end
+		
+		--계급
+		
+		--배터리0% 시 전등 꺼짐
+		--[=[
+		local OnVilige = self.Entity.PVPOnOff_Fog.onVilige
+		
+		if self.nowBattery <= 0 and OnVilige == false then
+			self.Entity.PVPOnOff_Fog:BatteryOff()
+			log(OnVilige)
+		end
+		--]=]
+		--log(self.nowExp)
+		--log("서버 업데이트")
+	end
+
+	@ExecSpace("Client")
+	method void HitHpUpdate()
+		self.nowHp = self.nowHp
+		
+	end
+
+	@ExecSpace("Server")
+	method void ToServer(HitEvent event)
+		local AttackCenter = event.AttackCenter
+		local AttackerEntity = event.AttackerEntity
+		local Damages = event.Damages
+		local Extra = event.Extra
+		local IsCritical = event.IsCritical
+		local TotalDamage = event.TotalDamage
+		---------------------------------------------------------)
+		
+		for i = 1, Damages.Count do
+			self.nowHp = self.nowHp - Damages [i]
+			self.nowHp = self.nowHp
+			if self.nowHp <= 0 then
+				self.Entity.StateComponent:ChangeState("DEAD")
+			end
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleHitEvent(HitEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: HitComponent
+		-- Space: Server, Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		--[
+		local AttackCenter = event.AttackCenter
+		local AttackerEntity = event.AttackerEntity
+		local Damages = event.Damages
+		local Extra = event.Extra
+		local IsCritical = event.IsCritical
+		local TotalDamage = event.TotalDamage
+		---------------------------------------------------------)
+		
+		for i = 1, Damages.Count do
+			self.nowHp = self.nowHp - Damages [i]
+			self.nowHp = self.nowHp
+			if self.nowHp <= 0 then
+				self.Entity.StateComponent:ChangeState("DEAD")
+			end
+		end
+		--]=]
+		self:HitHpUpdate()
+	end
+
+	@ExecSpace("ClientOnly")
+	@EventSender("LocalPlayer")
+	handler HandleDeadEvent(DeadEvent event)
+		--------------- Native Event Sender Info ----------------
+		-- Sender: StateComponent
+		-- Space: Server, Client
+		
+				self.Entity.PlayerState:OpenRevive()
+	end
+
+end

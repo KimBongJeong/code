@@ -1,0 +1,175 @@
+@Component
+script MonsterComponent extends Component
+
+	@Sync
+	property number MaxHp = 100
+
+	@Sync
+	property number Hp = 0
+
+	property boolean RespawnOn = false
+
+	property boolean IsDead = false
+
+	property number RespawnDelay = 5
+
+	property number DestroyDelay = 0.6
+
+	property number thisExp = 20
+
+	property number damage = 25
+
+	property number Q1Count = 0
+
+	property boolean Q1Countor = false
+
+	property TextComponent TextQ1Count = "d707c623-5606-4e7e-8871-d304439f1fe8"
+
+	method void OnBeginPlay()
+		self.Hp = self.MaxHp
+	end
+
+	@ExecSpace("ServerOnly")
+	method void Dead()
+		self.IsDead = true
+		local stateComponent = self.Entity.StateComponent
+		if stateComponent then
+			stateComponent:ChangeState("DEAD")
+			log("monster change state to DEAD")
+		end
+		
+		local delayHide = function()
+			self.Entity:SetVisible(false)
+			self.Entity:SetEnable(false)
+			
+			if self.RespawnOn == false then
+				self.Entity:Destroy()
+			end
+		end
+		
+		_TimerService:SetTimerOnce(delayHide, self.DestroyDelay)
+		
+		-- 몬스터가 UserItemDataSet에서 설정한 아이템을 무작위로 떨어뜨리게 처리
+		local itemCount = _DataService:GetTable("Etc"):GetRowCount()
+		
+		local index = _UtilLogic:RandomIntegerRange(1,itemCount)
+		-- Model_Item의 Entry ID를 복사하여 "Entry ID" 부분에 붙여 넣기
+		local itemEntity = _SpawnService:SpawnByModelId("model://maplestoryitem$a41da3b9937042af912d358bc4ce4213", "Item", self.Entity.TransformComponent.WorldPosition, self.Entity.Parent)
+		itemEntity.Item:InitItem(index)
+		--log("몬스터 데드")
+		--log(index)
+		--log(itemEntity.Id)
+		
+		if self.Q1Countor == true then
+			self.Q1Count = self.Q1Count + 1
+			self.Q1Count = self.Q1Count
+			log("dkdh.."..self.Q1Count)
+			self.TextQ1Count.Text = tostring(math.floor(self.Q1Count))
+		end
+		
+		
+	end
+
+	@ExecSpace("ServerOnly")
+	method void Respawn()
+		log("Respawn")
+		self.IsDead = false
+		self.Entity:SetVisible(true)
+		self.Entity:SetEnable(true)
+		
+		self.Hp = self.MaxHp
+		local stateComponent = self.Entity.StateComponent
+		if stateComponent then
+			stateComponent:ChangeState("IDLE")
+		end
+	end
+
+	@ExecSpace("ClientOnly")
+	@EventSender("Self")
+	handler HandleTriggerEnterEvent(TriggerEnterEvent event)
+		local TriggerBodyEntity = event.TriggerBodyEntity
+		if TriggerBodyEntity == _UserService.LocalPlayer and _UserService.LocalPlayer.StateComponent.CurrentStateName ~= "DEAD" then
+		
+			self.damage = math.random(self.damage - 3, self.damage + 3)
+			TriggerBodyEntity.HitComponent:OnHit(self.Entity, self.damage, false, "", 1)
+			TriggerBodyEntity.PlayerState.recovering = true
+			TriggerBodyEntity.TriggerComponent.Enable = false
+			
+		end
+	end
+
+	@EventSender("Self")
+	handler HandleHitEvent(HitEvent event)
+		-- Parameters
+		local AttackCenter = event.AttackCenter
+		local AttackerEntity = event.AttackerEntity
+		local Damages = event.Damages
+		local Extra = event.Extra
+		local IsCritical = event.IsCritical
+		local TotalDamage = event.TotalDamage
+		--------------------------------------------------------
+		if self:IsClient() then return end
+		
+		
+		self.Hp = self.Hp - TotalDamage
+		
+		if self.Hp <= 0 then
+			log ("몬스터 체력 0 이하")
+			if AttackerEntity and AttackerEntity.PlayerState then
+				AttackerEntity.PlayerState.nowExp = AttackerEntity.PlayerState.nowExp + self.thisExp
+			--_UserService.LocalPlayer.PlayerState.nowExp = _UserService.LocalPlayer.PlayerState.nowExp + self.thisExp	
+				local localPlayerExp = AttackerEntity.PlayerState.nowExp
+				local PlayerExp = PlayerExp + self.thisExp
+				log("현재 경험치")
+				local Qplayer = AttackerEntity.QuestComponent
+				local QplayerOn = Qplayer.isAccepted
+				self:Dead()
+				if QplayerOn == true then
+					local QplayerC = Qplayer.currentCount
+					QplayerC = QplayerC + 1
+					log("Q ZMSH +1")
+					if QplayerC == 3 then
+						local QplayerCom = Qplayer.isComplete
+						QplayerCom = true
+					end
+				end
+			end
+		end
+		
+		--for i =  1, Damages.Count do
+			--self.Hp = self.Hp - Damages[i]
+			
+			if self.Hp < 0 then
+			--	_UserService.LocalPlayer.PlayerState.nowExp = _UserService.LocalPlayer.PlayerState.nowExp + self.thisExp
+				--log("경험치 전달")
+				--self.Entity:Destroy(0.1)
+			end
+		--end
+		
+		--self:Dead()
+		
+		if self.RespawnOn then
+			log ("맞음")
+			--_TimerService:SetTimerOnce(timerFuntion, self.RespawnDelay)
+		end
+		
+		--for i = 1, Damages.Count do
+			--self.Hp = self.Hp - Damages[i]
+		--end
+		
+		--if self.Hp <= 0 then
+			--if AttackerEntity and AttackerEntity.PlayerState then
+				--AttackerEntity.PlayerState.nowExp = AttackerEntity.PlayerState.nowExp + self.thisExp
+			--end
+			
+			--	_UserService.LocalPlayer.PlayerState.nowExp = _UserService.LocalPlayer.PlayerState.nowExp + self.thisExp
+			
+			
+		--end
+		
+		local timerFunc = function() self:Respawn() end
+		
+		
+	end
+
+end

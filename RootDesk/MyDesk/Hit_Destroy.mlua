@@ -1,0 +1,19 @@
+@Component
+script Hit_Destroy extends Component
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Self")
+	handler HandleHitEvent(HitEvent event)
+		self.Entity.Visible = false
+		wait(1)
+		
+		local ModelId = "model://c00a0687-231d-473e-9b17-4ce715df53f4"
+		local Name = "Boss"
+		local Position = Vector3(0, 0, 0)
+		local Parent = _EntityService:GetEntityByPath("/maps/map01/object-5049")
+		
+		_SpawnService:SpawnByModelId(ModelId, Name, Position, Parent)
+		self.Entity:Destroy()
+	end
+
+end

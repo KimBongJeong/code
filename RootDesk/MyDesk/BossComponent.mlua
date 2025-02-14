@@ -1,0 +1,48 @@
+@Component
+script BossComponent extends Component
+
+	@ExecSpace("ServerOnly")
+	@EventSender("Self")
+	handler HandleHitEvent(HitEvent event)
+		local mapEntity = _EntityService:GetEntityByPath("/maps/map01")
+		local mapComponent = mapEntity.MapComponent
+		local playersArr = _UserService:GetUsersByMapComponent(mapComponent)
+		
+		for index, player in pairs(playersArr) do
+		    local bossPlayer = player:GetComponent("BossPlayer")
+		    if bossPlayer then
+				player.BossPlayer:Recive()
+				player.BossPlayer.syncBossHp = self.Entity.ZombieMushroomMonster.Hp 
+		    end
+		end
+		
+		--------------- Native Event Sender Info ----------------
+		-- Sender: HitComponent
+		-- Space: Server, Client
+		---------------------------------------------------------
+		
+		-- Parameters
+		-- local AttackCenter = event.AttackCenter
+		------local AttackerEntity = event.AttackerEntity
+		-- local Damages = event.Damages
+		-- local Extra = event.Extra
+		-- local IsCritical = event.IsCritical
+		-- local TotalDamage = event.TotalDamage
+		---------------------------------------------------------
+		------local player = AttackerEntity.BossPlayer
+		
+		--[[
+		local userId = AttackerEntity.PlayerComponent.UserId
+		local myPlayer = _UserService.LocalPlayer.Name
+		
+		
+		if userId == myPlayer then
+			player:Recive()
+		end
+		--]]
+		    --------------------------------------------------------
+		
+		
+	end
+
+end
