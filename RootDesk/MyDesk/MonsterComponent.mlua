@@ -150,22 +150,8 @@ script MonsterComponent extends Component
 		
 		if self.RespawnOn then
 			log ("맞음")
-			--_TimerService:SetTimerOnce(timerFuntion, self.RespawnDelay)
+			
 		end
-		
-		--for i = 1, Damages.Count do
-			--self.Hp = self.Hp - Damages[i]
-		--end
-		
-		--if self.Hp <= 0 then
-			--if AttackerEntity and AttackerEntity.PlayerState then
-				--AttackerEntity.PlayerState.nowExp = AttackerEntity.PlayerState.nowExp + self.thisExp
-			--end
-			
-			--	_UserService.LocalPlayer.PlayerState.nowExp = _UserService.LocalPlayer.PlayerState.nowExp + self.thisExp
-			
-			
-		--end
 		
 		local timerFunc = function() self:Respawn() end
 		
