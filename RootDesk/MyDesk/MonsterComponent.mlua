@@ -136,17 +136,13 @@ script MonsterComponent extends Component
 			end
 		end
 		
-		--for i =  1, Damages.Count do
-			--self.Hp = self.Hp - Damages[i]
+
 			
 			if self.Hp < 0 then
 			--	_UserService.LocalPlayer.PlayerState.nowExp = _UserService.LocalPlayer.PlayerState.nowExp + self.thisExp
 				--log("경험치 전달")
 				--self.Entity:Destroy(0.1)
 			end
-		--end
-		
-		--self:Dead()
 		
 		if self.RespawnOn then
 			log ("맞음")
